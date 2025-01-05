@@ -17,5 +17,5 @@ This project creates an interactive javascript dashboard utilizing the belly but
  - The language model AI Xpert was used for troubleshooting during the project
 
 ## Authors
-Andrew Lane, 2024
+Andrew Lane, 2025
 [@andrewplane](https://github.com/andrewplane)
