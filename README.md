@@ -10,7 +10,7 @@ The data looks at bacteria cultures collected from test subjects' belly buttons.
 ## Highlights
 - Selection of a Test Subject's ID will render:
  - Demographic information on the test subject
- - Top 10 bacteria by qty
+ - Top 10 bacteria by quantity
  - Representation of all bacteria sampled
 
 ## Setup
