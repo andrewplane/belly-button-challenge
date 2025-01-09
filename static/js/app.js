@@ -42,7 +42,6 @@ function buildCharts(sample) {
     let otu_ids = sampleData.otu_ids;
     let otu_labels = sampleData.otu_labels;
     let sample_values = sampleData.sample_values.map(Number);
-    // console.log(sample_values.type);
 
     // Build a Bubble Chart
     let trace1 = {
@@ -52,6 +51,7 @@ function buildCharts(sample) {
       marker: {
         size: sample_values,
         color: otu_ids,
+        colorscale: 'Viridis'
       },
       text: otu_labels,
       type: 'scatter'
