@@ -22,7 +22,6 @@ function buildMetadata(sample) {
     
       demographics.append('br');
     })
-
   });
 }
 
@@ -35,15 +34,15 @@ function buildCharts(sample) {
 
     // Filter the samples for the object with the desired sample number
     let filteredData = samplesField.filter(item => item.id === sample);
+    // console.log(`filteredData:`, filteredData);
     let sampleData = filteredData[0];
-    console.log(`sampleData`, sampleData);
+    // console.log(`sampleData:`, sampleData);
 
     // Get the otu_ids, otu_labels, and sample_values
     let otu_ids = sampleData.otu_ids;
     let otu_labels = sampleData.otu_labels;
-    let sample_values = sampleData.sample_values;
-
-    // console.log('Check: ', sampleValues);
+    let sample_values = sampleData.sample_values.map(Number);
+    // console.log(sample_values.type);
 
     // Build a Bubble Chart
     let trace1 = {
@@ -51,7 +50,7 @@ function buildCharts(sample) {
       y: sample_values,
       mode: 'markers',
       marker: {
-        sizes: sample_values/43,
+        size: sample_values,
         color: otu_ids,
       },
       text: otu_labels,
@@ -71,30 +70,44 @@ function buildCharts(sample) {
 
     // For the Bar Chart, map the otu_ids to a list of strings for your yticks
     // Sort the data by sample_values descending
-    let sortedSamples = samplesField.sort((a, b) => b.sample_values - a.sample_values);
-
+    let sortedSamples = filteredData.sort((a, b) => b.sample_values - a.sample_values);
+    sortedSamples = sortedSamples[0];
+    // console.log(`sortedSamples`, sortedSamples);
+    let top_otu_ids = sortedSamples.otu_ids.slice(0, 10);
+    let top_otu_labels = sortedSamples.otu_labels.slice(0, 10);
+    let top_sample_values = sortedSamples.sample_values.slice(0, 10);
+    // console.log(`topOTU_IDS: `, top_otu_ids);
     // Slice the first 10 objects for plotting
-    let firstTenSamples = sortedSamples.slice(0, 10);
-    console.log(`firstTenSamples`, firstTenSamples);
+    // let firstTenSamples = sortedSamples.slice(0, 10);
+    // console.log(`firstTenSamples`, firstTenSamples);
 
     // Reverse the array to accommodate Plotly's defaults
-    firstTenSamples.reverse();
+    top_otu_ids.reverse();
+    top_otu_labels.reverse();
+    top_sample_values.reverse();
 
-    // Trace1 for the Greek Data
+    let yticks = top_otu_ids.map(id => `OTU ${id}  `);
+
+    // Trace2 for the Bar Chart Data
     let trace2 = {
-      x: firstTenSamples.map(object => object.sample_values),
-      y: slicedData.map(object => object.greekName),
-      text: slicedData.map(object => object.greekName),
-      name: "Greek",
+      x: top_sample_values,
+      y: yticks,
+      text: top_otu_labels,
+      name: "Bacteria Cultures",
       type: "bar",
       orientation: "h"
     };
-    
-    let yticks = otu_ids.map(id => `OTU ${id}`);
+    console.log(yticks);
+
 
     // Build a Bar Chart
     // Don't forget to slice and reverse the input data appropriately
+    let barData = [trace2];
 
+    layout = {
+      title: 'Top 10 Bacteria Cultures Found',
+      xaxis: {title: 'Number of Bacteria'}
+    }
     // Render the Bar Chart
     Plotly.newPlot("bar", barData, layout)
 
@@ -110,13 +123,7 @@ function init() {
 
     // Use d3 to select the dropdown with id of `#selDataset`
     const dropdown = d3.select('#selDataset');
-    let selectedValue = [];
-    // dropdown.addEventListener('change', function(event) {
-    //   const selectedValue = event.target.value;
-    // });
-
-
-
+        
     // Use the list of sample names to populate the select options
     dropdown.selectAll('option')  // Select all 'option' elements  
       .data(names)                // Link with data in 'namea' array
@@ -124,30 +131,31 @@ function init() {
       .append('option')           // Append the '<option>' tag
       .text(d => d)               // Set text to the element in names
       .attr('value', d => d);     // Set value of each to the element in names
-      
-    d3.select('#selDataset')
-      .on('change', function(event) {
-        selectedValue = d3.select(this).property('value');
-        console.log('Selected Value: ', selectedValue);
+
+    d3.select('#selDataset').on('change', function() {
+      let newSample = d3.select(this).property('value');
+      buildCharts(newSample);
+      buildMetadata(newSample*1); // Convert newSample to a number
     });
-    // Get the first sample from the list
-    // let firstSample = names[0];   
-    // let sample = dropdown.property('value');
-    // sample = selectedValue;
-    // console.log(`sample`, sample);
+
+    // Get the first sample from the list 
+    let sample = dropdown.property('value');
+
     // Build charts and metadata panel with the first sample
-    buildCharts(selectedValue);  
-    buildMetadata(selectedValue*1); // Convert firstSample to a number
+    buildCharts(sample);  
+    buildMetadata(sample*1); // Convert firstSample to a number
   });
 }
 
+
+
 // Function for event listener
-function optionChanged(newSample) {
-  // Build charts and metadata panel each time a new sample is selected
-  // sample = dropdown.property('value');
-  // buildCharts(sample);
-  // buildMetadata(sample*1);
-}
+// function optionChanged(newSample) {
+//   // Build charts and metadata panel each time a new sample is selected
+//   sample = dropdown.property('value');
+//   buildCharts(sample);
+//   buildMetadata(sample*1);
+// }
 
 // Initialize the dashboard
 init();
